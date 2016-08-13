@@ -8,4 +8,12 @@
         <shortDescription>Empty Field List For Query</shortDescription>
         <value>You must specify a list of fields for retrieval.</value>
     </labels>
+    <labels>
+        <fullName>Invalid_Filter_Type</fullName>
+        <categories>LightningStandardController</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Invalid Filter Type</shortDescription>
+        <value>You have specified a filter of an invalid type.</value>
+    </labels>
 </CustomLabels>
