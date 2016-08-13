@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>Empty_Field_List_For_Query</fullName>
+        <categories>LightningStandardController</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Empty Field List For Query</shortDescription>
+        <value>You must specify a list of fields for retrieval.</value>
+    </labels>
+</CustomLabels>

@@ -51,4 +51,33 @@ public with sharing class LightningStandardController {
         return Database.query(query);
     }
 
+    /**
+      * @description Retrieves a list of records from the specified object with the requested fields
+      * @param objectType The API name of the object we are saving, for example Account or Invoice__c.
+      * @param fields A list of strings which are the API field names for the fields we wish to retrieve.
+      * @return The list of retrieved records.
+      */
+    @AuraEnabled
+    public static List<SObject> query(String objectType, List<String> fields) {
+        if(fields == null || fields.size() == 0) {
+            throw new LightningStandardControllerException(Label.Empty_Field_List_For_Query);
+        }
+
+        String query = 'SELECT ';
+
+        for(String field : fields) {
+            query += field + ',';
+        }
+
+        query = query.substring(0, query.length() - 1) + ' FROM ' + objectType;
+
+        return query(query);
+    }
+
+    /**
+      * @description Custom exception class for the Lightning Standard Controller system.
+      */
+    public class LightningStandardControllerException extends Exception {
+
+    }
 }
