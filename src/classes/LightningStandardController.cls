@@ -55,53 +55,21 @@ public with sharing class LightningStandardController {
       * @description Retrieves a list of records from the specified object with the requested fields
       * @param objectType The API name of the object we are saving, for example Account or Invoice__c.
       * @param fields A list of strings which are the API field names for the fields we wish to retrieve.
-      * @return The list of retrieved records.
-      */
-    public static List<SObject> query(String objectType, List<String> fields) {
-        if(fields == null || fields.size() == 0) {
-            throw new LightningStandardControllerException(Label.Empty_Field_List_For_Query);
-        }
-
-        String query = 'SELECT ';
-
-        for(String field : fields) {
-            query += field + ',';
-        }
-
-        query = query.substring(0, query.length() - 1) + ' FROM ' + objectType;
-
-        return runQuery(query);
-    }
-
-    /**
-      * @description Retrieves a list of records from the specified object with the requested fields
-      * @param objectType The API name of the object we are saving, for example Account or Invoice__c.
-      * @param fields A list of strings which are the API field names for the fields we wish to retrieve.
       * @param filters A map of field names to filter values.
       * @return The list of retrieved records.
       */
     @AuraEnabled
     public static List<SObject> query(String objectType, List<String> fields, Map<String, Object> and_filters, Map<String, Object> or_filters, Map<String, Object> in_filters) {
         
-        if(and_filters == null && or_filters == null && in_filters == null) {
-            return query(objectType, fields);
-        }
-
         and_filters = and_filters == null ? new Map<String, Object>() : (Map<String, Object>)and_filters;
         or_filters = or_filters == null ? new Map<String, Object>() : (Map<String, Object>)or_filters;
         in_filters = in_filters == null ? new Map<String, Object>() : (Map<String, Object>)in_filters;
 
-        if(fields == null || fields.size() == 0) {
-            throw new LightningStandardControllerException(Label.Empty_Field_List_For_Query);
+        String query = buildFieldQuery(objectType, fields);
+
+        if(and_filters == null && or_filters == null && in_filters == null) {
+            return runQuery(query);
         }
-
-        String query = 'SELECT ';
-
-        for(String field : fields) {
-            query += field + ',';
-        }
-
-        query = query.substring(0, query.length() - 1) + ' FROM ' + objectType;
 
         if(!and_filters.isEmpty() || !or_filters.isEmpty() || !in_filters.isEmpty()) {
             query += ' WHERE ';
@@ -132,6 +100,28 @@ public with sharing class LightningStandardController {
         }
 
         return runQuery(query);
+    }
+
+    /**
+      * @description Retrieves a list of records from the specified object with the requested fields
+      * @param objectType The API name of the object we are saving, for example Account or Invoice__c.
+      * @param fields A list of strings which are the API field names for the fields we wish to retrieve.
+      * @return The list of retrieved records.
+      */
+    private static String buildFieldQuery(String objectType, List<String> fields) {
+        if(fields == null || fields.size() == 0) {
+            throw new LightningStandardControllerException(Label.Empty_Field_List_For_Query);
+        }
+
+        String query = 'SELECT ';
+
+        for(String field : fields) {
+            query += field + ',';
+        }
+
+        query = query.substring(0, query.length() - 1) + ' FROM ' + objectType;
+
+        return query;
     }
 
     /**

@@ -45,7 +45,7 @@ private class LightningStandardControllerTest {
     private static void testQueryWithFieldList() {
         insert acc;
 
-        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name' });
+        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name' }, null, null, null);
 
         System.assertEquals(1, accs.size());
         System.assertEquals(testAccountName, accs[0].Name);
@@ -57,7 +57,7 @@ private class LightningStandardControllerTest {
         insert acc;
 
         try {
-            List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>());
+            List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>(), null, null, null);
             System.assert(false, 'Error should be thrown');
         } catch(LightningStandardController.LightningStandardControllerException lex) {
             System.assertEquals(Label.Empty_Field_List_For_Query, lex.getMessage());
@@ -69,7 +69,7 @@ private class LightningStandardControllerTest {
         insert acc;
 
         try {
-            List<Account> accs = (List<Account>)LightningStandardController.query('Account', null);
+            List<Account> accs = (List<Account>)LightningStandardController.query('Account', null, null, null, null);
             System.assert(false, 'Error should be thrown');
         } catch(LightningStandardController.LightningStandardControllerException lex) {
             System.assertEquals(Label.Empty_Field_List_For_Query, lex.getMessage());
