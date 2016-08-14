@@ -47,7 +47,7 @@ public with sharing class LightningStandardController {
       * @return The list of retrieved records.
       */
     @AuraEnabled
-    public static List<SObject> query(String query) {
+    public static List<SObject> runQuery(String query) {
         return Database.query(query);
     }
 
@@ -57,7 +57,6 @@ public with sharing class LightningStandardController {
       * @param fields A list of strings which are the API field names for the fields we wish to retrieve.
       * @return The list of retrieved records.
       */
-    @AuraEnabled
     public static List<SObject> query(String objectType, List<String> fields) {
         if(fields == null || fields.size() == 0) {
             throw new LightningStandardControllerException(Label.Empty_Field_List_For_Query);
@@ -71,7 +70,7 @@ public with sharing class LightningStandardController {
 
         query = query.substring(0, query.length() - 1) + ' FROM ' + objectType;
 
-        return query(query);
+        return runQuery(query);
     }
 
     /**
@@ -82,7 +81,16 @@ public with sharing class LightningStandardController {
       * @return The list of retrieved records.
       */
     @AuraEnabled
-    public static List<SObject> query(String objectType, List<String> fields, LightningStandardQueryFilters filters) {
+    public static List<SObject> query(String objectType, List<String> fields, Map<String, Object> and_filters, Map<String, Object> or_filters, Map<String, Object> in_filters) {
+        
+        if(and_filters == null && or_filters == null && in_filters == null) {
+            return query(objectType, fields);
+        }
+
+        and_filters = and_filters == null ? new Map<String, Object>() : (Map<String, Object>)and_filters;
+        or_filters = or_filters == null ? new Map<String, Object>() : (Map<String, Object>)or_filters;
+        in_filters = in_filters == null ? new Map<String, Object>() : (Map<String, Object>)in_filters;
+
         if(fields == null || fields.size() == 0) {
             throw new LightningStandardControllerException(Label.Empty_Field_List_For_Query);
         }
@@ -95,42 +103,43 @@ public with sharing class LightningStandardController {
 
         query = query.substring(0, query.length() - 1) + ' FROM ' + objectType;
 
-        if(filters.hasFilters()) {
+        if(!and_filters.isEmpty() || !or_filters.isEmpty() || !in_filters.isEmpty()) {
             query += ' WHERE ';
         }
 
-        System.debug('PAULx ' + filters.ls_and.isEmpty() + ':: ' + filters.ls_and);
-
-        if(!filters.ls_and.isEmpty()) {
-            for(String key : filters.ls_and.keySet()) {
-                query += buildFilterString(key, filters.ls_and.get(key)) + ' AND ';
+        if(!and_filters.isEmpty()) {
+            for(String key : and_filters.keySet()) {
+                query += buildFilterString(key, and_filters.get(key)) + ' AND ';
             }
             query = query.substring(0, query.length() - 4);
         }
 
-        if(!filters.ls_or.isEmpty()) {
-            query += filters.ls_and.isEmpty() ? '' : ' AND '; 
+        if(!or_filters.isEmpty()) {
+            query += and_filters.isEmpty() ? '' : ' AND '; 
             query += '(';
-            for(String key : filters.ls_or.keySet()) {
-                query += buildFilterString(key, filters.ls_or.get(key)) + ' OR ';
+            for(String key : or_filters.keySet()) {
+                query += buildFilterString(key, or_filters.get(key)) + ' OR ';
             }
             query = query.substring(0, query.length() - 4) + ')';
         }
 
-        if(!filters.ls_in.isEmpty()) {
-            query += filters.ls_and.isEmpty() && filters.ls_or.isEmpty() ? '' : ' AND ';
-            for(String key : filters.ls_in.keySet()) {
-                query += buildInFilterString(key, (List<String>)filters.ls_in.get(key)) + ' AND ';
+        if(!in_filters.isEmpty()) {
+            query += and_filters.isEmpty() && or_filters.isEmpty() ? '' : ' AND ';
+            for(String key : in_filters.keySet()) {
+                query += buildInFilterString(key, (List<String>)in_filters.get(key)) + ' AND ';
             }
             query = query.substring(0, query.length() - 4);
         }
 
-        System.debug('PAUL: ' + query);
-
-        return query(query);
+        return runQuery(query);
     }
 
-
+    /**
+      * @description This method takes a field name and value and creates a filter string to use.
+      * @param fieldName This name of the field we are filtering on.
+      * @param value The value we are trying to equate to.
+      * @return A correctly formatted string for use in the query string.
+      */
     private static String buildFilterString(String fieldName, Object value) {
         String filter = fieldName + ' = ';
 
@@ -148,6 +157,12 @@ public with sharing class LightningStandardController {
         return filter;
     }
 
+    /**
+      * @description This method takes a field name and value and creates a filter string to use.
+      * @param fieldName This name of the field we are filtering on.
+      * @param values The list value we are trying to find our value in.
+      * @return A correctly formatted string for use in the query string.
+      */
     private static String buildInFilterString(String fieldName, List<String> values) {
         String filter = fieldName + ' in ' + '(';
             
@@ -158,19 +173,6 @@ public with sharing class LightningStandardController {
         filter = filter.substring(0, filter.length() - 1) + ')';
 
         return filter;
-    }
-
-    /**
-      * @description Filter object used to enable a flexible querying structure for the 
-      */
-    public class LightningStandardQueryFilters {
-        public Map<String, Object> ls_and = new Map<String, Object>();
-        public Map<String, Object> ls_or = new Map<String, Object>();
-        public Map<String, Object> ls_in = new Map<String, Object>();
-
-        public Boolean hasFilters() {
-            return !ls_and.isEmpty() || !ls_or.isEmpty() || !ls_in.isEmpty();
-        }
     }
 
     /**

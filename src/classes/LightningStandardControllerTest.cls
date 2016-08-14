@@ -34,7 +34,7 @@ private class LightningStandardControllerTest {
     private static void testQuery() {
         insert acc;
 
-        List<Account> accs = (List<Account>)LightningStandardController.query('SELECT Id, Name FROM Account');
+        List<Account> accs = (List<Account>)LightningStandardController.runQuery('SELECT Id, Name FROM Account');
 
         System.assertEquals(1, accs.size());
         System.assertEquals(testAccountName, accs[0].Name);
@@ -80,11 +80,9 @@ private class LightningStandardControllerTest {
     private static void testQueryWithAndFilterMap() {
         insert acc;
 
-        LightningStandardController.LightningStandardQueryFilters filters = new LightningStandardController.LightningStandardQueryFilters();
+        Map<String, Object> andFilters = new Map<String, Object>{'Name' => testAccountName, 'AccountNumber' => testAccountNumber};
 
-        filters.ls_and = new Map<String, Object>{'Name' => testAccountName, 'AccountNumber' => testAccountNumber};
-
-        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber' }, filters);
+        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber' }, andFilters, null, null);
 
         System.assertEquals(1, accs.size());
         System.assertEquals(testAccountName, accs[0].Name);
@@ -96,11 +94,9 @@ private class LightningStandardControllerTest {
     private static void testQueryWithOrFilterMap() {
         insert acc;
 
-        LightningStandardController.LightningStandardQueryFilters filters = new LightningStandardController.LightningStandardQueryFilters();
+        Map<String, Object> orFilters = new Map<String, Object>{'Name' => testAccountName, 'AccountNumber' => testAccountNumber};
 
-        filters.ls_or = new Map<String, Object>{'Name' => testAccountName, 'AccountNumber' => testAccountNumber};
-
-        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber' }, filters);
+        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber' }, null, orFilters, null);
 
         System.assertEquals(1, accs.size());
         System.assertEquals(testAccountName, accs[0].Name);
@@ -112,11 +108,9 @@ private class LightningStandardControllerTest {
     private static void testQueryWithInFilterMap() {
         insert acc;
 
-        LightningStandardController.LightningStandardQueryFilters filters = new LightningStandardController.LightningStandardQueryFilters();
+        Map<String, Object> inFilters = new Map<String, Object>{'Name' => new List<String>{testAccountName}};
 
-        filters.ls_in = new Map<String, Object>{'Name' => new List<String>{testAccountName}};
-
-        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber' }, filters);
+        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber' }, null, null, inFilters);
 
         System.assertEquals(1, accs.size());
         System.assertEquals(testAccountName, accs[0].Name);
@@ -128,12 +122,10 @@ private class LightningStandardControllerTest {
     private static void testComplexFilterQueryAndOr() {
         insert acc;
 
-        LightningStandardController.LightningStandardQueryFilters filters = new LightningStandardController.LightningStandardQueryFilters();
+        Map<String, Object> andFilters = new Map<String, Object>{'Name' => testAccountName, 'Site' => testAccountSite};
+        Map<String, Object> orFilters = new Map<String, Object>{'AccountNumber' => '321', 'AccountNumber' => testAccountNumber};
 
-        filters.ls_and = new Map<String, Object>{'Name' => testAccountName, 'Site' => testAccountSite};
-        filters.ls_or = new Map<String, Object>{'AccountNumber' => '321', 'AccountNumber' => testAccountNumber};
-
-        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber', 'Site' }, filters);
+        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber', 'Site' }, andFilters, orFilters, null);
 
         System.assertEquals(1, accs.size());
         System.assertEquals(testAccountName, accs[0].Name);
@@ -146,12 +138,10 @@ private class LightningStandardControllerTest {
     private static void testComplexFilterQueryAndIn() {
         insert acc;
 
-        LightningStandardController.LightningStandardQueryFilters filters = new LightningStandardController.LightningStandardQueryFilters();
+        Map<String, Object> andFilters = new Map<String, Object>{'AccountNumber' => testAccountNumber, 'Site' => testAccountSite};
+        Map<String, Object> inFilters = new Map<String, Object>{'Name' => new List<String>{testAccountName}};
 
-        filters.ls_and = new Map<String, Object>{'AccountNumber' => testAccountNumber, 'Site' => testAccountSite};
-        filters.ls_in = new Map<String, Object>{'Name' => new List<String>{testAccountName}};
-
-        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber', 'Site' }, filters);
+        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber', 'Site' }, andFilters, null, inFilters);
 
         System.assertEquals(1, accs.size());
         System.assertEquals(testAccountName, accs[0].Name);
@@ -164,12 +154,10 @@ private class LightningStandardControllerTest {
     private static void testComplexFilterQueryOrIn() {
         insert acc;
 
-        LightningStandardController.LightningStandardQueryFilters filters = new LightningStandardController.LightningStandardQueryFilters();
+        Map<String, Object> orFilters = new Map<String, Object>{'AccountNumber' => '321', 'AccountNumber' => testAccountNumber};
+        Map<String, Object> inFilters = new Map<String, Object>{'Name' => new List<String>{testAccountName}};
 
-        filters.ls_or = new Map<String, Object>{'AccountNumber' => '321', 'AccountNumber' => testAccountNumber};
-        filters.ls_in = new Map<String, Object>{'Name' => new List<String>{testAccountName}};
-
-        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber', 'Site' }, filters);
+        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber', 'Site' }, null, orFilters, inFilters);
 
         System.assertEquals(1, accs.size());
         System.assertEquals(testAccountName, accs[0].Name);
@@ -182,13 +170,11 @@ private class LightningStandardControllerTest {
     private static void testComplexFilterQueryAndOrIn() {
         insert acc;
 
-        LightningStandardController.LightningStandardQueryFilters filters = new LightningStandardController.LightningStandardQueryFilters();
+        Map<String, Object> andFilters = new Map<String, Object>{'NumberOfEmployees' => testAccountNumberOfEmployees, 'Site' => testAccountSite};
+        Map<String, Object> orFilters = new Map<String, Object>{'AccountNumber' => '321', 'AccountNumber' => testAccountNumber};
+        Map<String, Object> inFilters = new Map<String, Object>{'Name' => new List<String>{testAccountName, 'My Account'}};
 
-        filters.ls_and = new Map<String, Object>{'NumberOfEmployees' => testAccountNumberOfEmployees, 'Site' => testAccountSite};
-        filters.ls_or = new Map<String, Object>{'AccountNumber' => '321', 'AccountNumber' => testAccountNumber};
-        filters.ls_in = new Map<String, Object>{'Name' => new List<String>{testAccountName, 'My Account'}};
-
-        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber', 'Site' }, filters);
+        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber', 'Site' }, andFilters, orFilters, inFilters);
 
         System.assertEquals(1, accs.size());
         System.assertEquals(testAccountName, accs[0].Name);
@@ -201,12 +187,10 @@ private class LightningStandardControllerTest {
     private static void testQueryWithAndFilterInvalidType() {
         insert acc;
 
-        LightningStandardController.LightningStandardQueryFilters filters = new LightningStandardController.LightningStandardQueryFilters();
-
-        filters.ls_and = new Map<String, Object>{'Name' => testAccountName, 'CreatedDate' => new List<String>{testAccountName, 'My Account'} };
+        Map<String, Object> andFilters = new Map<String, Object>{'Name' => testAccountName, 'CreatedDate' => new List<String>{testAccountName, 'My Account'} };
 
         try {
-            List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber' }, filters);
+            List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber' }, andFilters, null, null);
             System.assert(false, 'Error should be thrown');
         } catch(LightningStandardController.LightningStandardControllerException lex) {
             System.assertEquals(Label.Invalid_Filter_Type, lex.getMessage());
@@ -217,14 +201,12 @@ private class LightningStandardControllerTest {
     private static void testComplexQueryWithEmptyFieldListError() {
         insert acc;
 
-        LightningStandardController.LightningStandardQueryFilters filters = new LightningStandardController.LightningStandardQueryFilters();
-
-        filters.ls_and = new Map<String, Object>{'NumberOfEmployees' => testAccountNumberOfEmployees, 'Site' => testAccountSite};
-        filters.ls_or = new Map<String, Object>{'AccountNumber' => '321', 'AccountNumber' => testAccountNumber};
-        filters.ls_in = new Map<String, Object>{'Name' => new List<String>{testAccountName, 'My Account'}};
+        Map<String, Object> andFilters = new Map<String, Object>{'NumberOfEmployees' => testAccountNumberOfEmployees, 'Site' => testAccountSite};
+        Map<String, Object> orFilters = new Map<String, Object>{'AccountNumber' => '321', 'AccountNumber' => testAccountNumber};
+        Map<String, Object> inFilters = new Map<String, Object>{'Name' => new List<String>{testAccountName, 'My Account'}};
 
         try {
-            List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>(), filters);
+            List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>(), andFilters, orFilters, inFilters);
             System.assert(false, 'Error should be thrown');
         } catch(LightningStandardController.LightningStandardControllerException lex) {
             System.assertEquals(Label.Empty_Field_List_For_Query, lex.getMessage());
@@ -235,14 +217,12 @@ private class LightningStandardControllerTest {
     private static void testComplexQueryWithNullFieldListError() {
         insert acc;
 
-        LightningStandardController.LightningStandardQueryFilters filters = new LightningStandardController.LightningStandardQueryFilters();
-
-        filters.ls_and = new Map<String, Object>{'NumberOfEmployees' => testAccountNumberOfEmployees, 'Site' => testAccountSite};
-        filters.ls_or = new Map<String, Object>{'AccountNumber' => '321', 'AccountNumber' => testAccountNumber};
-        filters.ls_in = new Map<String, Object>{'Name' => new List<String>{testAccountName, 'My Account'}};
+        Map<String, Object> andFilters = new Map<String, Object>{'NumberOfEmployees' => testAccountNumberOfEmployees, 'Site' => testAccountSite};
+        Map<String, Object> orFilters = new Map<String, Object>{'AccountNumber' => '321', 'AccountNumber' => testAccountNumber};
+        Map<String, Object> inFilters = new Map<String, Object>{'Name' => new List<String>{testAccountName, 'My Account'}};
 
         try {
-            List<Account> accs = (List<Account>)LightningStandardController.query('Account', null, filters);
+            List<Account> accs = (List<Account>)LightningStandardController.query('Account', null, andFilters, orFilters, inFilters);
             System.assert(false, 'Error should be thrown');
         } catch(LightningStandardController.LightningStandardControllerException lex) {
             System.assertEquals(Label.Empty_Field_List_For_Query, lex.getMessage());
@@ -255,11 +235,9 @@ private class LightningStandardControllerTest {
 
         Test.setCreatedDate(acc.Id, Date.today());
 
-        LightningStandardController.LightningStandardQueryFilters filters = new LightningStandardController.LightningStandardQueryFilters();
+        Map<String, Object> orFilters = new Map<String, Object>{'Name' => testAccountName, 'CreatedDate' => Date.today()};
 
-        filters.ls_or = new Map<String, Object>{'Name' => testAccountName, 'CreatedDate' => Date.today()};
-
-        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber' }, filters);
+        List<Account> accs = (List<Account>)LightningStandardController.query('Account', new List<String>{ 'Id', 'Name', 'AccountNumber' }, null, orFilters, null);
 
         System.assertEquals(1, accs.size());
         System.assertEquals(testAccountName, accs[0].Name);
