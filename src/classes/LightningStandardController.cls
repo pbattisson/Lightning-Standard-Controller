@@ -16,7 +16,7 @@ public with sharing class LightningStandardController {
       */
     @AuraEnabled
     public static Id save(String objectType, SObject record) {
-        return save(objectType, new List<SObject>{ record })[0];
+        return saveMany(objectType, new List<SObject>{ record })[0];
     }
 
     /**
@@ -26,7 +26,7 @@ public with sharing class LightningStandardController {
       * @return The list of Ids of the saved records.
       */
     @AuraEnabled
-    public static List<Id> save(String objectType, List<SObject> records) {
+    public static List<Id> saveMany(String objectType, List<SObject> records) {
         Type listType = Type.forName(String.format(listStringTemplate, new List<String>{ objectType }));
         List<SObject> items = (List<SObject>)listType.newInstance();
         items.addAll(records);

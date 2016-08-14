@@ -23,7 +23,7 @@ private class LightningStandardControllerTest {
         Account acc2 = new Account();
         acc2.Name = 'Test Account2';
 
-        List<Id> recordIds = LightningStandardController.save('Account', new List<Account>{ acc, acc2 });
+        List<Id> recordIds = LightningStandardController.saveMany('Account', new List<Account>{ acc, acc2 });
 
         for(Id recordId : recordIds) {
             System.assertNotEquals(null, recordId, 'Null record Id returned.');    
